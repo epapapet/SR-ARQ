@@ -29,26 +29,26 @@ $ ./ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <err_rate> <ac
 where:
 
 * ns is the ns executable
-* <scriptfile> is the tcl file (please include also the path to the file)
-* <bandwidth> : the link bandwidth (in bps, example: set to 5Mbps -> 5M or 5000000)
-* <propagation_delay> : the link propagation delay (in secs, example: set to 30ms -> 30ms or 0.03)
-* <window_size> : the aqr window size in pkts (a value of 1 results in simulating the Alternating Bit Protocol)
-* <err_rate> : the error rate in the forward channel (sender->receiver)
-* <ack_rate> : the error rate in the return channel (receiver->sender)
-* <num_rtx> : the number of retransmissions allowed for a packet
-* <seed> : seed used to produce randomness
+* \<scriptfile\> is the tcl file (please include also the path to the file)
+* \<bandwidth\> : the link bandwidth (in bps, example: set to 5Mbps -> 5M or 5000000)
+* \<propagation_delay\> : the link propagation delay (in secs, example: set to 30ms -> 30ms or 0.03)
+* \<window_size\> : the aqr window size in pkts (a value of 1 results in simulating the Alternating Bit Protocol)
+* \<err_rate\> : the error rate in the forward channel (sender->receiver)
+* \<ack_rate\> : the error rate in the return channel (receiver->sender)
+* \<num_rtx\> : the number of retransmissions allowed for a packet
+* \<seed\> : seed used to produce randomness
 
 -----------------------
 ## How to cite this work
 
 When you write a paper that involves the use of this code, we would appreciate it if you can cite our tool using the following entry.
 
-* E. Papapetrou and P. Karetsi, "Selective Repeat ARQ implementation for ns2", 2020. [Online]. Available: https://github.com/epap/SR-ARQ.
+* E. Papapetrou and P. Karetsi, "Selective Repeat ARQ implementation for ns2", 2020. [Online]. Available: https://github.com/epapapet/SR-ARQ.
 
 * BibTeX entry:
 >@misc{SR-ARQ-epap,  
 >	author = {Papapetrou, Evangelos and Karetsi, Photini},  
 >	title = {Selective Repeat ARQ implementation for ns2},  
->	howpublished = {[Online]. Available: https://github.com/epap/SR-ARQ},  
+>	howpublished = {[Online]. Available: https://github.com/epapapet/SR-ARQ},  
 >	year = {2020}  
 >}
