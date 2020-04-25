@@ -49,6 +49,6 @@ When you write a paper that involves the use of this code, we would appreciate i
 >@misc{SR-ARQ-epap,  
 >	author = {Papapetrou, Evangelos and Karetsi, Photini},  
 >	title = {Selective Repeat ARQ implementation for ns2},  
->	howpublished = {[Online]. Available: https://github.com/epapapet/SR-ARQ},  
+>	howpublished = {[Online]. Available: https://github.com/epapapet/SR-ARQ },  
 >	year = {2020}  
 >}
