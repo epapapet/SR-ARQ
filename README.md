@@ -16,7 +16,7 @@ The implementation has been tested successfully in ns2 v2.35. Compatibility with
 
 **Steps**
 
-Copy the files arq.h and arq.cc in a folder within the ns2 folder. Then, include the statement ``arq_folder/arq.o \`` at the end of the ``OBJ_CC`` section of the Makefile, where ``arq_folder`` is the folder in which you copies the files. After that recompile ns.
+Copy the files arq.h and arq.cc in a folder within the ns2 folder. Then, include the statement ``arq_folder/arq.o \`` at the end of the ``OBJ_CC`` section of the Makefile, where ``arq_folder`` is the folder in which you copied the files. After that recompile ns.
 
 ## Running a simulation
 
