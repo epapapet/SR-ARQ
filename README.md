@@ -2,7 +2,7 @@
 
 This is an implementation of the Selective Repeat (SR) ARQ protocol in [ns2](https://www.isi.edu/nsnam/ns/). In contrast to the HDLC implementation included in ns2, which can only be used in a satellite channel, this implementation can be used in a typical wired link.
 
-The code was developed in the [Department of Computer Science and Engineering](http://www.cse.uoi.gr/en/index.php?menu=m1), [University of Ioannina](http://www.uoi.gr/en), Greece by [Evangelos Papapetrou](http://cse.uoi.gr/~epap) in cooperation with undergraduate student [Photini Karetsi](https://github.com/pkaretsi).
+The code was developed in the [Department of Computer Science and Engineering](http://www.cse.uoi.gr/en/index.php?menu=m1), [University of Ioannina](http://www.uoi.gr/en), Greece by [Evangelos Papapetrou](http://cse.uoi.gr/~epap) in cooperation with undergraduate student [Foteini Karetsi](https://github.com/pkaretsi).
 
 This implementation is based on the design of the Alternating Bit Protocol (ABP) implementation discussed in the book:
 
@@ -43,11 +43,11 @@ where:
 
 When you write a paper that involves the use of this code, we would appreciate it if you can cite our tool using the following entry.
 
-* E. Papapetrou and P. Karetsi, "Selective Repeat ARQ implementation for ns2", 2020. [Online]. Available: https://github.com/epapapet/SR-ARQ.
+* E. Papapetrou and F. Karetsi, "Selective Repeat ARQ implementation for ns2", 2020. [Online]. Available: https://github.com/epapapet/SR-ARQ.
 
 * BibTeX entry:
 >@misc{SR-ARQ-epap,  
->	author = {Papapetrou, Evangelos and Karetsi, Photini},  
+>	author = {Papapetrou, Evangelos and Karetsi, Foteini},  
 >	title = {Selective Repeat ARQ implementation for ns2},  
 >	howpublished = {[Online]. Available: https://github.com/epapapet/SR-ARQ },  
 >	year = {2020}  
