@@ -19,6 +19,10 @@ class ARQSRTx : public Connector {
 	void ack(int rcv_sn, int rcv_uid);
 	void resume();
 	int command(int argc, const char*const* argv);
+	//functions used in statistics logging
+	double get_start_time() {return start_time;}
+	int get_total_packets_sent() {return packets_sent;}
+	double get_pkt_tx_start(int seq_num) {return pkt_tx_start[seq_num%wnd_];}
  protected:
 	ARQSRHandler arqh_;
 	Handler* handler_;
@@ -38,6 +42,11 @@ class ARQSRTx : public Connector {
 	int last_acked_sq_; //sequence number of last acked frame
 	int most_recent_sq_; //sequence number of most recent frame to be sent
 	int num_pending_retrans_; //number of frames needed to be retransmitted (after the first attempt)
+
+	//Statistics
+	double start_time; //time when 1st packet arrived at ARQTx::recv
+	int packets_sent; //unique packets sent
+	double *pkt_tx_start; //the start time of a packet's transmission
 
 	int findpos_retrans();
 	void reset_lastacked();
@@ -67,7 +76,12 @@ class ARQSRAcker : public ARQSRRx {
 	Packet **pkt_buf; //buffer used for storing packets arriving out of order
 	int last_fwd_sn_; //sequence number of the last frame forwarded to the upper layer
 	int most_recent_acked; //sequence number of the last frame for which an ack has been sent
+
+	//Statistics
+	double finish_time; //time when the last pkt was delivered to the receiver's upper layer, used to calculate throughput
 	int delivered_pkts; //the total number of pkts delivered to the receiver's upper layer
+	int delivered_data; //the total number of bytes delivered to the receiver's upper layer
+	double sum_of_delay; //sum of delays for every packet delivered, used to calculate average delay
 
 	RandomVariable *ranvar_; //a random variable for generating errors in ACK delivery
 	double err_rate; //the rate of errors in ACK delivery
