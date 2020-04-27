@@ -355,7 +355,7 @@ int ARQSRAcker::command(int argc, const char*const* argv)
 void ARQSRAcker::recv(Packet* p, Handler* h)
 {
 
-	ACKEvent *new_ACKEvent = new ACKEvent();
+	SRACKEvent *new_ACKEvent = new SRACKEvent();
 	hdr_cmn *ch = HDR_CMN(p);
 	int seq_num = ch->opt_num_forwards_;
 	int pkt_uid = ch->uid();
@@ -476,7 +476,7 @@ void ARQSRAcker::print_stats()
 void ARQSRAcker::handle(Event* e)
 {
 
-	ACKEvent *rcv_ack = (ACKEvent *)e;
+	SRACKEvent *rcv_ack = (SRACKEvent *)e;
 	int rcv_sn = rcv_ack->ACK_sn;
 	int rcv_uid = rcv_ack->ACK_uid;
 	delete e;
@@ -495,7 +495,7 @@ void ARQSRAcker::handle(Event* e)
 void ARQSRNacker::recv(Packet* p, Handler* h)
 {
 
-	ACKEvent *new_ACKEvent = new ACKEvent();
+	SRACKEvent *new_ACKEvent = new SRACKEvent();
 	hdr_cmn *ch = HDR_CMN(p);
 	Event *ack_e;
 	new_ACKEvent->ACK_sn = ch->opt_num_forwards_;
@@ -510,7 +510,7 @@ void ARQSRNacker::recv(Packet* p, Handler* h)
 
 void ARQSRNacker::handle(Event* e)
 {
-	ACKEvent *rcv_ack = (ACKEvent *)e;
+	SRACKEvent *rcv_ack = (SRACKEvent *)e;
 	int rcv_sn = rcv_ack->ACK_sn;
 	int rcv_uid = rcv_ack->ACK_uid;
 	delete e;

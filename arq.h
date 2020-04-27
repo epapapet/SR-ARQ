@@ -82,7 +82,7 @@ class ARQSRNacker : public ARQSRRx {
 	void recv(Packet*, Handler*);
 };
 
-class ACKEvent : public Event {
+class SRACKEvent : public Event {
  public:
 	int ACK_sn;
 	int ACK_uid;
