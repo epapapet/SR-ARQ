@@ -5,7 +5,7 @@ ARQSRAcker set delay_ 30ms
 ARQSRNacker set debug_ NULL
 ARQSRNacker set delay_ 30ms
 
-# usage: ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+# usage: ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <simulation_time> <seed>
 # <bandwidth> : in bps, example: set to 5Mbps -> 5M or 5000000
 # <propagation_delay> : in secs, example: set to 30ms -> 30ms or 0.03
 # <window_size> : aqr window size in pkts
@@ -13,6 +13,7 @@ ARQSRNacker set delay_ 30ms
 # <err_rate> : the error rate in the forward channel (error rate for frames)
 # <ack_rate> : the error rate in the return channel (error rate for ACKs)
 # <num_rtx> : the number of retransmissions allowed for a native pkt
+# <simulation_time> : the simulation time in secs
 # <seed> : seed used to produce randomness
 SimpleLink instproc link-arq { limit wndsize vgseed ackerr} {
     $self instvar link_ link_errmodule_ queue_ drophead_ head_
@@ -90,7 +91,7 @@ $em unit pkt
 $em set bandwidth_ $link_bwd
 
 set vagrng [new RNG]
-$vagrng seed [lindex $argv 7]
+$vagrng seed [lindex $argv 8]
 set vagranvar [new RandomVariable/Uniform]
 $vagranvar use-rng $vagrng
 
@@ -100,7 +101,7 @@ $em drop-target [new Agent/Null]
 $ns link-lossmodel $em $n1 $n3
 
 set num_rtx [lindex $argv 6]
-set receiver [$ns link-arq $window $num_rtx $n1 $n3 [lindex $argv 7] [lindex $argv 5]]
+set receiver [$ns link-arq $window $num_rtx $n1 $n3 [lindex $argv 8] [lindex $argv 5]]
 
 #=== Set up a TCP connection ===
 set tcp [new Agent/TCP]
@@ -113,7 +114,8 @@ $ftp attach-agent $tcp
 $ns connect $tcp $sink
 
 $ns at 0.0 "$ftp start"
-$ns at 100.0 show_tcp_seqno
-$ns at 100.0 print_stats
-$ns at 100.1 "exit 0"
+$ns at [lindex $argv 7] "$ftp stop"
+$ns at [expr {[lindex $argv 7] + 0.5}] show_tcp_seqno
+$ns at [expr {[lindex $argv 7] + 0.5}] print_stats
+$ns at [expr {[lindex $argv 7] + 1.0}] "exit 0"
 $ns run

@@ -23,7 +23,7 @@ Copy the files arq.h and arq.cc in a folder within the ns2 folder. Then, include
 We provide a bunch of tcl files that can be used to run example simulations. You can modify those tcl files to suit your needs. To use those simulation files you can issue the following command from within the ns directory:
 
 ```
-$ ./ns arq-Tx_ftp.tcl <bandwidth> <propagation_delay> <window_size> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+$ ./ns arq-Tx_ftp.tcl <bandwidth> <propagation_delay> <window_size> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <simulation_time> <seed>
 ```
 
 where:
@@ -36,12 +36,13 @@ where:
 * \<err_rate\> : the error rate in the forward channel (sender->receiver)
 * \<ack_rate\> : the error rate in the return channel (receiver->sender)
 * \<num_rtx\> : the number of retransmissions allowed for a packet
+* \<simulation_time\> : the simulation time in secs
 * \<seed\> : seed used to produce randomness
 
 or:
 
 ```
-$ ./ns arq-Tx_cbr.tcl <bandwidth> <propagation_delay> <window_size> <cbr_rate> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+$ ./ns arq-Tx_cbr.tcl <bandwidth> <propagation_delay> <window_size> <cbr_rate> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <simulation_time> <seed>
 ```
 
 where: 
