@@ -22,6 +22,7 @@ class ARQSRTx : public Connector {
 	//functions used in statistics logging
 	double get_start_time() {return start_time;}
 	int get_total_packets_sent() {return packets_sent;}
+  int get_total_retransmissions() {return pkt_rtxs;}
 	double get_pkt_tx_start(int seq_num) {return pkt_tx_start[seq_num%wnd_];}
  protected:
 	ARQSRHandler arqh_;
@@ -46,6 +47,7 @@ class ARQSRTx : public Connector {
 	//Statistics
 	double start_time; //time when 1st packet arrived at ARQTx::recv
 	int packets_sent; //unique packets sent
+  int pkt_rtxs; //the total number of pkt retransmissions
 	double *pkt_tx_start; //the start time of a packet's transmission
 
 	int findpos_retrans();

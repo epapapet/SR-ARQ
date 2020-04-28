@@ -51,6 +51,7 @@ ARQSRTx::ARQSRTx() : arqh_(*this)
 
 	start_time = -1; //time when 1st packet arrived at ARQTx::recv
 	packets_sent = 0; //unique packets sent
+  pkt_rtxs = 0; //the total number of pkt retransmissions
 }
 
 int ARQSRTx::command(int argc, const char*const* argv)
@@ -68,7 +69,7 @@ int ARQSRTx::command(int argc, const char*const* argv)
 			status = new ARQSRStatus[wnd_];
 			num_rtxs = new int[wnd_];
 			pkt_uids = new int[wnd_];
-			pkt_tx_start = new double[wnd_]; 
+			pkt_tx_start = new double[wnd_];
 			for(int i=0; i<wnd_; i++){ pkt_buf[i] = NULL; status[i] = IDLE; num_rtxs[i] = 0; pkt_uids[i]=-1; pkt_tx_start[i]=-1; }
 			return(TCL_OK);
 		}
@@ -81,7 +82,7 @@ void ARQSRTx::recv(Packet* p, Handler* h)
 
 	//This procedure is invoked by the queue_ (i.e., output queue) to deliver a message to ARQSRTx
 	//The check whether the current window exceeds or not wnd_ has already be done at this point
-	
+
 	if(last_acked_sq_ == -1 && most_recent_sq_ == 0 && start_time == -1){ //first packet to be received will trigger the clock
 		start_time = Scheduler::instance().clock();
 	}
@@ -171,7 +172,8 @@ void ARQSRTx::nack(int rcv_sn, int rcv_uid)
 			num_rtxs[rcv_sn%wnd_]++;
 			status[rcv_sn%wnd_] = SENT;
 			//TO DO: here we should add a dignostic before using pkt_buf[rcv_sn%wnd_] in order to avoid using a null pointer
-			send(pkt_buf[rcv_sn%wnd_],&arqh_);
+      pkt_rtxs++;
+      send(pkt_buf[rcv_sn%wnd_],&arqh_);
 		} else {
 			num_pending_retrans_++;
 		}
@@ -204,6 +206,7 @@ void ARQSRTx::resume()
 		status[runner_] = SENT;
 		num_pending_retrans_--;
 		blocked_ = 1;
+    pkt_rtxs++;
 		send(pkt_buf[runner_],&arqh_);
 
     } else {//there are no pending retransmision, check whether it is possible to send a new packet
@@ -503,12 +506,13 @@ void ARQSRAcker::print_stats()
 	printf("Delivered data (in bytes):\t%d\n", delivered_data);
 	double throughput = (delivered_data * 8) / (double) (finish_time - arq_tx_->get_start_time());
 	printf("Total throughput (Mbps):\t%f\n", throughput * 1.0e-6);
-
-	double mean = sum_of_delay / delivered_pkts;
-	printf("Mean delay (msec):\t\t%f\n", mean * 1.0e+3);
-
 	printf("Unique packets sent:\t\t%d\n", arq_tx_->get_total_packets_sent());
+  double mean = sum_of_delay / delivered_pkts;
+	printf("Mean delay (msec):\t\t%f\n", mean * 1.0e+3);
+  double avg_rtxs = (double) (arq_tx_->get_total_retransmissions()) / (double)(arq_tx_->get_total_packets_sent());
+  printf("Avg num of retransmissions:\t%f\n", avg_rtxs);
 	printf("Packet loss rate:\t\t%f\n", 1 - (delivered_pkts / (double) arq_tx_->get_total_packets_sent()));
+  printf("//------------------------------------------//\n");
 }
 
 void ARQSRAcker::handle(Event* e)

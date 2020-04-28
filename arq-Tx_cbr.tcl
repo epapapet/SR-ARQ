@@ -5,10 +5,12 @@ ARQSRAcker set delay_ 30ms
 ARQSRNacker set debug_ NULL
 ARQSRNacker set delay_ 30ms
 
-# usage: ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+# usage: ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <cbr_rate> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
 # <bandwidth> : in bps, example: set to 5Mbps -> 5M or 5000000
 # <propagation_delay> : in secs, example: set to 30ms -> 30ms or 0.03
 # <window_size> : aqr window size in pkts
+# <cbr_rate> : the rate of the cbr applications, in bps, example: set to 3Mbps -> 3M or 3000000
+# <pkt_size> : the size of udp pkt (including udp and ip headers)
 # <err_rate> : the error rate in the forward channel (error rate for frames)
 # <ack_rate> : the error rate in the return channel (error rate for ACKs)
 # <num_rtx> : the number of retransmissions allowed for a native pkt
@@ -77,14 +79,14 @@ $ns duplex-link $n1 $n3 $link_bwd $link_delay DropTail
 #=== Create error and ARQ module ===
 set window [lindex $argv 2]
 set em [new ErrorModel]
-$em set rate_ [lindex $argv 3]
+$em set rate_ [lindex $argv 5]
 
 $em set enable_ 1
 $em unit pkt
 $em set bandwidth_ $link_bwd
 
 set vagrng [new RNG]
-$vagrng seed [lindex $argv 6]
+$vagrng seed [lindex $argv 8]
 set vagranvar [new RandomVariable/Uniform]
 $vagranvar use-rng $vagrng
 
@@ -93,8 +95,8 @@ $em drop-target [new Agent/Null]
 
 $ns link-lossmodel $em $n1 $n3
 
-set num_rtx [lindex $argv 5]
-set receiver [$ns link-arq $window $num_rtx $n1 $n3 [lindex $argv 6] [lindex $argv 4]]
+set num_rtx [lindex $argv 7]
+set receiver [$ns link-arq $window $num_rtx $n1 $n3 [lindex $argv 8] [lindex $argv 6]]
 
 #=== Set up a UDP connection ===
 set udp [new Agent/UDP]
@@ -102,8 +104,8 @@ set sink [new Agent/Null]
 set cbr [new Application/Traffic/CBR]
 
 $cbr set type_ CBR
-$cbr set packet_size_ 1000
-$cbr set rate_ 3mb
+$cbr set packet_size_ [lindex $argv 4]
+$cbr set rate_ [lindex $argv 3]
 $cbr set random_ false
 
 $ns attach-agent $n1 $udp

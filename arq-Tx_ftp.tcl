@@ -5,10 +5,11 @@ ARQSRAcker set delay_ 30ms
 ARQSRNacker set debug_ NULL
 ARQSRNacker set delay_ 30ms
 
-# usage: ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+# usage: ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
 # <bandwidth> : in bps, example: set to 5Mbps -> 5M or 5000000
 # <propagation_delay> : in secs, example: set to 30ms -> 30ms or 0.03
 # <window_size> : aqr window size in pkts
+# <pkt_size> : the size of a TCP segment (not including the TCP and IP headers)
 # <err_rate> : the error rate in the forward channel (error rate for frames)
 # <ack_rate> : the error rate in the return channel (error rate for ACKs)
 # <num_rtx> : the number of retransmissions allowed for a native pkt
@@ -82,14 +83,14 @@ $ns duplex-link $n1 $n3 $link_bwd $link_delay DropTail
 #=== Create error and ARQ module ===
 set window [lindex $argv 2]
 set em [new ErrorModel]
-$em set rate_ [lindex $argv 3]
+$em set rate_ [lindex $argv 4]
 
 $em set enable_ 1
 $em unit pkt
 $em set bandwidth_ $link_bwd
 
 set vagrng [new RNG]
-$vagrng seed [lindex $argv 6]
+$vagrng seed [lindex $argv 7]
 set vagranvar [new RandomVariable/Uniform]
 $vagranvar use-rng $vagrng
 
@@ -98,11 +99,12 @@ $em drop-target [new Agent/Null]
 
 $ns link-lossmodel $em $n1 $n3
 
-set num_rtx [lindex $argv 5]
-set receiver [$ns link-arq $window $num_rtx $n1 $n3 [lindex $argv 6] [lindex $argv 4]]
+set num_rtx [lindex $argv 6]
+set receiver [$ns link-arq $window $num_rtx $n1 $n3 [lindex $argv 7] [lindex $argv 5]]
 
 #=== Set up a TCP connection ===
 set tcp [new Agent/TCP]
+$tcp set packetSize_ [lindex $argv 3]
 set sink [new Agent/TCPSink]
 set ftp [new Application/FTP]
 $ns attach-agent $n1 $tcp

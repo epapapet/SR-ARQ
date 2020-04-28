@@ -23,20 +23,33 @@ Copy the files arq.h and arq.cc in a folder within the ns2 folder. Then, include
 We provide a bunch of tcl files that can be used to run example simulations. You can modify those tcl files to suit your needs. To use those simulation files you can issue the following command from within the ns directory:
 
 ```
-$ ./ns <scriptfile> <bandwidth> <propagation_delay> <window_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+$ ./ns arq-Tx_ftp.tcl <bandwidth> <propagation_delay> <window_size> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
 ```
 
 where:
 
 * ns is the ns executable
-* \<scriptfile\> is the tcl file (please include also the path to the file)
 * \<bandwidth\> : the link bandwidth (in bps, example: set to 5Mbps -> 5M or 5000000)
 * \<propagation_delay\> : the link propagation delay (in secs, example: set to 30ms -> 30ms or 0.03)
 * \<window_size\> : the aqr window size in pkts (a value of 1 results in simulating the Alternating Bit Protocol)
+* \<pkt_size\> : the size of a TCP segment (not including the TCP and IP headers)
 * \<err_rate\> : the error rate in the forward channel (sender->receiver)
 * \<ack_rate\> : the error rate in the return channel (receiver->sender)
 * \<num_rtx\> : the number of retransmissions allowed for a packet
 * \<seed\> : seed used to produce randomness
+
+or:
+
+```
+$ ./ns arq-Tx_cbr.tcl <bandwidth> <propagation_delay> <window_size> <cbr_rate> <pkt_size> <err_rate> <ack_err_rate> <num_rtx> <seed>
+```
+
+where: 
+
+* \<cbr_rate\> : the rate of the cbr applications, in bps, example: set to 3Mbps -> 3M or 3000000
+* \<pkt_size\> : the size of udp pkt (including udp and ip headers)
+
+while the other parameters are the same as in the case of arq-Tx_ftp.tcl.
 
 -----------------------
 ## How to cite this work
