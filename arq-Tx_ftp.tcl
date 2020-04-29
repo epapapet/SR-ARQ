@@ -115,7 +115,7 @@ $ns connect $tcp $sink
 
 $ns at 0.0 "$ftp start"
 $ns at [lindex $argv 7] "$ftp stop"
-$ns at [expr {[lindex $argv 7] + 0.5}] show_tcp_seqno
+$ns at [expr {[lindex $argv 7] + 0.51}] show_tcp_seqno
 $ns at [expr {[lindex $argv 7] + 0.5}] print_stats
 $ns at [expr {[lindex $argv 7] + 1.0}] "exit 0"
 $ns run

@@ -82,6 +82,8 @@ void ARQSRTx::recv(Packet* p, Handler* h)
 
 	//This procedure is invoked by the queue_ (i.e., output queue) to deliver a message to ARQSRTx
 	//The check whether the current window exceeds or not wnd_ has already be done at this point
+  if (handler_ == 0) printf("Simulation time: %10.4f", Scheduler::instance().clock());
+  if (handler_ != 0) printf("\b\b\b\b\b\b\b\b\b\b%10.4f", Scheduler::instance().clock());
 
 	if(last_acked_sq_ == -1 && most_recent_sq_ == 0 && start_time == -1){ //first packet to be received will trigger the clock
 		start_time = Scheduler::instance().clock();
@@ -498,7 +500,7 @@ void ARQSRAcker::deliver_frames(int steps, bool mindgaps, Handler *h)
 
 void ARQSRAcker::print_stats()
 {
-	printf("//--------------- STATISTICS ---------------//\n");
+	printf("\n//--------------- STATISTICS ---------------//\n");
 	printf("Start time (sec):\t\t%f\n", arq_tx_->get_start_time());
 	printf("Finish time (sec):\t\t%f\n", finish_time);
 
