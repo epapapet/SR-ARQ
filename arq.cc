@@ -506,10 +506,11 @@ void ARQSRAcker::print_stats()
 
 	printf("Total number of delivered pkts:\t%d\n", delivered_pkts);
 	printf("Delivered data (in bytes):\t%d\n", delivered_data);
+  if (delivered_pkts == 0) {finish_time = Scheduler::instance().clock();} //hack for the case that deliver_frames is not called
 	double throughput = (delivered_data * 8) / (double) (finish_time - arq_tx_->get_start_time());
 	printf("Total throughput (Mbps):\t%f\n", throughput * 1.0e-6);
 	printf("Unique packets sent:\t\t%d\n", arq_tx_->get_total_packets_sent());
-  double mean = sum_of_delay / delivered_pkts;
+  double mean = (delivered_pkts == 0) ? (0.0) : (sum_of_delay / delivered_pkts);
 	printf("Mean delay (msec):\t\t%f\n", mean * 1.0e+3);
   double avg_rtxs = (double) (arq_tx_->get_total_retransmissions()) / (double)(arq_tx_->get_total_packets_sent());
   printf("Avg num of retransmissions:\t%f\n", avg_rtxs);
