@@ -69,8 +69,7 @@ int ARQSRTx::command(int argc, const char*const* argv)
 			status = new ARQSRStatus[wnd_];
 			num_rtxs = new int[wnd_];
 			pkt_uids = new int[wnd_];
-			pkt_tx_start = new double[wnd_];
-			for(int i=0; i<wnd_; i++){ pkt_buf[i] = NULL; status[i] = IDLE; num_rtxs[i] = 0; pkt_uids[i]=-1; pkt_tx_start[i]=-1; }
+			for(int i=0; i<wnd_; i++){ pkt_buf[i] = NULL; status[i] = IDLE; num_rtxs[i] = 0; pkt_uids[i]=-1; }
 			return(TCL_OK);
 		}
 	} return Connector::command(argc, argv);
@@ -117,12 +116,13 @@ void ARQSRTx::recv(Packet* p, Handler* h)
 	status[most_recent_sq_%wnd_] = SENT;
 
 	packets_sent += 1;
-	pkt_tx_start[most_recent_sq_%wnd_] = Scheduler::instance().clock(); //retransmitted pkts are not sent through recv(), so this is a new pkt
+  ch->ts_arr_ = Scheduler::instance().clock(); //used to calculate delay, retransmitted pkts are not sent through recv(), so this is a new pkt
 
 	most_recent_sq_ = (most_recent_sq_+1)%sn_cnt;
 
 	blocked_ = 1;
-	send(p,&arqh_);
+  Packet *pnew = p->copy();
+	send(pnew,&arqh_);
 
 }
 
@@ -175,7 +175,8 @@ void ARQSRTx::nack(int rcv_sn, int rcv_uid)
 			status[rcv_sn%wnd_] = SENT;
 			//TO DO: here we should add a dignostic before using pkt_buf[rcv_sn%wnd_] in order to avoid using a null pointer
       pkt_rtxs++;
-      send(pkt_buf[rcv_sn%wnd_],&arqh_);
+      Packet *newp = pkt_buf[rcv_sn%wnd_]->copy();
+      send(newp,&arqh_);
 		} else {
 			num_pending_retrans_++;
 		}
@@ -209,7 +210,8 @@ void ARQSRTx::resume()
 		num_pending_retrans_--;
 		blocked_ = 1;
     pkt_rtxs++;
-		send(pkt_buf[runner_],&arqh_);
+    Packet *pnew = (pkt_buf[runner_])->copy();
+		send(pnew,&arqh_);
 
     } else {//there are no pending retransmision, check whether it is possible to send a new packet
 
@@ -272,7 +274,6 @@ void ARQSRTx::reset_lastacked()
 		num_rtxs[runner_] = 0;
 
 		pkt_uids[runner_] = -1;
-		pkt_tx_start[runner_] = -1;
 		last_acked_sq_ = (last_acked_sq_ + 1)%sn_cnt;
 
 		runner_ = (runner_ + 1)%wnd_;
@@ -404,13 +405,12 @@ void ARQSRAcker::recv(Packet* p, Handler* h)
 			pkt_buf[nxt_seq%wnd_] = NULL;
 			last_fwd_sn_ = (last_fwd_sn_+1)%sn_cnt;
 
-			Packet *pnew = p->copy();
 			finish_time = Scheduler::instance().clock();
 			delivered_data += ch->size_;
 			delivered_pkts++;
-			sum_of_delay = sum_of_delay + Scheduler::instance().clock() - arq_tx_->get_pkt_tx_start(nxt_seq);
+			sum_of_delay = sum_of_delay + Scheduler::instance().clock() - ch->ts_arr_;
 
-			send(pnew,h);
+			send(p,h);
 			deliver_frames((wnd_-1), true, h); //check whether other frames are now in order and should be delivered
 
 		} else {//a new frame arrives out of order, should be ACKEd and stored in the appropriate position
@@ -428,6 +428,7 @@ void ARQSRAcker::recv(Packet* p, Handler* h)
 					fprintf(stderr, "Error at ARQSRRx::handle, received retransmission has not the same uid.\n");
 					abort();
 				}
+        Packet::free(p);
 				//-------------------------------//
 
 			}
@@ -480,14 +481,13 @@ void ARQSRAcker::deliver_frames(int steps, bool mindgaps, Handler *h)
 		if ((pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_] == NULL)&&(mindgaps)) break;
 
 		if(pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_]) {
-			Packet *pnew = pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_]->copy();
 			finish_time = Scheduler::instance().clock();
 			delivered_data += (HDR_CMN(pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_]))->size_;
 			delivered_pkts++;
-			sum_of_delay = sum_of_delay + Scheduler::instance().clock() - arq_tx_->get_pkt_tx_start((HDR_CMN(pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_]))->opt_num_forwards_);
+			sum_of_delay = sum_of_delay + Scheduler::instance().clock() - (HDR_CMN(pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_]))->ts_arr_;
 
 
-			send(pnew,h);
+			send(pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_],h);
 		}
 		pkt_buf[((last_fwd_sn_+1)%sn_cnt)%wnd_] = NULL;
 		last_fwd_sn_ = (last_fwd_sn_+1)%sn_cnt;
@@ -504,17 +504,17 @@ void ARQSRAcker::print_stats()
 	printf("Start time (sec):\t\t%f\n", arq_tx_->get_start_time());
 	printf("Finish time (sec):\t\t%f\n", finish_time);
 
-	printf("Total number of delivered pkts:\t%d\n", delivered_pkts);
-	printf("Delivered data (in bytes):\t%d\n", delivered_data);
+	printf("Total number of delivered pkts:\t%.0f\n", delivered_pkts);
+	printf("Delivered data (in bytes):\t%.0f\n", delivered_data);
   if (delivered_pkts == 0) {finish_time = Scheduler::instance().clock();} //hack for the case that deliver_frames is not called
-	double throughput = (delivered_data * 8) / (double) (finish_time - arq_tx_->get_start_time());
+	double throughput = (delivered_data * 8) / (finish_time - arq_tx_->get_start_time());
 	printf("Total throughput (Mbps):\t%f\n", throughput * 1.0e-6);
-	printf("Unique packets sent:\t\t%d\n", arq_tx_->get_total_packets_sent());
+	printf("Unique packets sent:\t\t%.0f\n", arq_tx_->get_total_packets_sent());
   double mean = (delivered_pkts == 0) ? (0.0) : (sum_of_delay / delivered_pkts);
 	printf("Mean delay (msec):\t\t%f\n", mean * 1.0e+3);
-  double avg_rtxs = (double) (arq_tx_->get_total_retransmissions()) / (double)(arq_tx_->get_total_packets_sent());
+  double avg_rtxs = arq_tx_->get_total_retransmissions() / arq_tx_->get_total_packets_sent();
   printf("Avg num of retransmissions:\t%f\n", avg_rtxs);
-	printf("Packet loss rate:\t\t%f\n", 1 - (delivered_pkts / (double) arq_tx_->get_total_packets_sent()));
+	printf("Packet loss rate:\t\t%f\n", 1 - (delivered_pkts / arq_tx_->get_total_packets_sent()));
   printf("//------------------------------------------//\n");
 }
 
