@@ -1,5 +1,6 @@
 #include "connector.h"
 #include "ranvar.h"
+#include "delay.h"
 class ARQSRTx;
 enum ARQSRStatus {IDLE,SENT,ACKED,RTX,DROP};
 
@@ -19,6 +20,7 @@ class ARQSRTx : public Connector {
 	void ack(int rcv_sn, int rcv_uid);
 	void resume();
 	int command(int argc, const char*const* argv);
+  Handler *get_link_handler() {return target_;}
 	//functions used in statistics logging
 	double get_start_time() {return start_time;}
 	double get_total_packets_sent() {return packets_sent;}

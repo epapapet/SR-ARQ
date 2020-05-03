@@ -464,7 +464,7 @@ void ARQSRAcker::recv(Packet* p, Handler* h)
 	ack_e = (Event *)new_ACKEvent;
 
 	if (delay_ > 0)
-		Scheduler::instance().schedule(this, ack_e, delay_);
+		Scheduler::instance().schedule(this, ack_e, (delay_ + 8.0/((LinkDelay *)(arq_tx_->get_link_handler()))->bandwidth()));
 	else
 		handle(ack_e);
     //---------------------------------//
@@ -548,7 +548,7 @@ void ARQSRNacker::recv(Packet* p, Handler* h)
 	ack_e = (Event *)new_ACKEvent;
 
 	if (delay_ > 0)
-		Scheduler::instance().schedule(this, ack_e, delay_);
+		Scheduler::instance().schedule(this, ack_e, (delay_ + 8.0/((LinkDelay *)(arq_tx_->get_link_handler()))->bandwidth()));
 	else
 		handle(ack_e);
 }
