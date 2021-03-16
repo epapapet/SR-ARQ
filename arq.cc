@@ -185,6 +185,7 @@ void ARQSRTx::nack(int rcv_sn, int rcv_uid)
 
 		status[rcv_sn%wnd_] = DROP;
 		drop(pkt_buf[rcv_sn%wnd_]);
+    pkt_buf[rcv_sn%wnd_] = NULL;
 		if (rcv_sn%wnd_ == ((last_acked_sq_ + 1)%sn_cnt)%wnd_){
 			reset_lastacked(); //droped frame is next in order so check whether the active window should advance
 			if(!blocked_) handler_->handle(0); //if ARQSRTx is not transmiting ask queue_ to deliver next packet
@@ -440,7 +441,7 @@ void ARQSRAcker::recv(Packet* p, Handler* h)
 	} else if (within_bww && !within_fww) {//frame belongs to the backward window, so it is a retransmitted frame (due to loss of ACK)
 
 		//ignore the packet and acknowledge
-		//delete p;
+		Packet::free(p);
 		//ATTTENTION: we should provide enough separation between bww and fww so that we can identify new frames, i.e., being able to enter the else clause
 
 	} else {//frame arrives out of order because ARQSRTx has exceeded the retransmission limit and as a result has dropped one or more frames
@@ -546,6 +547,7 @@ void ARQSRNacker::recv(Packet* p, Handler* h)
 	new_ACKEvent->ACK_sn = ch->opt_num_forwards_;
 	new_ACKEvent->ACK_uid = ch->uid();
 	ack_e = (Event *)new_ACKEvent;
+  Packet::free(p);
 
 	if (delay_ > 0)
 		Scheduler::instance().schedule(this, ack_e, (delay_ + 8.0/((LinkDelay *)(arq_tx_->get_link_handler()))->bandwidth()));
